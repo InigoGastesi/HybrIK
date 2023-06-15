@@ -4,12 +4,12 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
-
+import cv2
 from .builder import SPPE
 from .layers.smpl.SMPL import SMPL_layer
 from .layers.hrnet.hrnet import get_hrnet
 
-
+import time
 def flip(x):
     assert (x.dim() == 3 or x.dim() == 4)
     dim = x.dim() - 1
@@ -313,6 +313,7 @@ class HRNetSMPLCam(nn.Module):
         hm_y0 = heatmaps.sum((2, 4))  # (B, K, H)
         hm_z0 = heatmaps.sum((3, 4))  # (B, K, D)
 
+
         range_tensor = torch.arange(hm_x0.shape[-1], dtype=torch.float32, device=hm_x0.device).unsqueeze(-1)
         # hm_x = hm_x0 * range_tensor
         # hm_y = hm_y0 * range_tensor
@@ -331,6 +332,9 @@ class HRNetSMPLCam(nn.Module):
 
         #  -0.5 ~ 0.5
         pred_uvd_jts_29 = torch.cat((coord_x, coord_y, coord_z), dim=2)
+        hrenet_pred_29 = pred_uvd_jts_29.clone()
+        hrenet_pred_29 = hrenet_pred_29.reshape(batch_size, 29 * 3)
+
 
         x0 = x0.view(x0.size(0), -1)
         init_shape = self.init_shape.expand(batch_size, -1)     # (B, 10,)
@@ -425,7 +429,6 @@ class HRNetSMPLCam(nn.Module):
         pred_xyz_jts_29_flat = pred_xyz_jts_29.reshape(batch_size, -1)
 
         pred_phi = pred_phi.reshape(batch_size, 23, 2)
-
         output = self.smpl.hybrik(
             pose_skeleton=pred_xyz_jts_29.type(self.smpl_dtype) * self.depth_factor,  # unit: meter
             betas=pred_shape.type(self.smpl_dtype),
@@ -455,6 +458,7 @@ class HRNetSMPLCam(nn.Module):
             pred_xyz_jts_24=pred_xyz_jts_24,
             pred_xyz_jts_24_struct=pred_xyz_jts_24_struct,
             pred_xyz_jts_17=pred_xyz_jts_17_flat,
+            hrenet_pred_29=hrenet_pred_29,
             pred_vertices=pred_vertices,
             maxvals=maxvals,
             cam_scale=camScale[:, 0],

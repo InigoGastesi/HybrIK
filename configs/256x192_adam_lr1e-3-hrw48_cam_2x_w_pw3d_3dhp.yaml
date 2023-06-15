@@ -20,7 +20,8 @@ DATASET:
   OCCLUSION: True
 MODEL:
   TYPE: 'HRNetSMPLCam'
-  HR_PRETRAINED: './pose_hrnet_w48_256x192.pth'
+  #HR_PRETRAINED: './pose_hrnet_w48_256x192.pth'
+  HR_PRETRAINED: './pretrained_models/hybrik_hrnet.pth'
   PRETRAINED: ''
   # TRY_LOAD: ''
   TRY_LOAD: ''

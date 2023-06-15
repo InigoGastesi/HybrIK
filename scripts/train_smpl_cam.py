@@ -16,7 +16,7 @@ from hybrik.opt import cfg, logger, opt
 from hybrik.utils.env import init_dist
 from hybrik.utils.metrics import DataLogger, NullWriter, calc_coord_accuracy
 from hybrik.utils.transforms import get_func_heatmap_to_coord
-from torch.utils.tensorboard import SummaryWriter
+# from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
 # torch.set_num_threads(64)
@@ -205,7 +205,7 @@ def main():
     else:
         ngpus_per_node = torch.cuda.device_count()
         opt.ngpus_per_node = ngpus_per_node
-        mp.spawn(main_worker, nprocs=ngpus_per_node, args=(opt, cfg))
+        main_worker(0, opt, cfg)
 
 
 def main_worker(gpu, opt, cfg):
@@ -215,12 +215,12 @@ def main_worker(gpu, opt, cfg):
     if gpu is not None:
         opt.gpu = gpu
 
-    init_dist(opt)
+    # init_dist(opt)
 
-    if not opt.log:
-        logger.setLevel(50)
-        null_writer = NullWriter()
-        sys.stdout = null_writer
+    # if not opt.log:
+    #     logger.setLevel(50)
+    #     null_writer = NullWriter()
+    #     sys.stdout = null_writer
 
     logger.info('******************************')
     logger.info(opt)
@@ -240,7 +240,7 @@ def main_worker(gpu, opt, cfg):
         logger.info(macs, params)
 
     m.cuda(opt.gpu)
-    m = torch.nn.parallel.DistributedDataParallel(m, device_ids=[opt.gpu])
+    # m = torch.nn.parallel.DistributedDataParallel(m, device_ids=[opt.gpu])
 
     criterion = builder.build_loss(cfg.LOSS).cuda(opt.gpu)
     optimizer = torch.optim.Adam(m.parameters(), lr=cfg.TRAIN.LR)
@@ -248,10 +248,10 @@ def main_worker(gpu, opt, cfg):
     lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(
         optimizer, milestones=cfg.TRAIN.LR_STEP, gamma=cfg.TRAIN.LR_FACTOR)
 
-    if opt.log:
-        writer = SummaryWriter('.tensorboard/{}/{}-{}'.format(cfg.DATASET.DATASET, cfg.FILE_NAME, opt.exp_id))
-    else:
-        writer = None
+    # if opt.log:
+    #     writer = SummaryWriter('.tensorboard/{}/{}-{}'.format(cfg.DATASET.DATASET, cfg.FILE_NAME, opt.exp_id))
+    
+    writer = None
 
     if cfg.DATASET.DATASET == 'mix_smpl':
         train_dataset = MixDataset(

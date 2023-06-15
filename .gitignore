@@ -108,3 +108,8 @@ data
 data/
 exp
 model_files
+
+
+HPE.test.*
+pretrained_models
+*.mp4

@@ -21,7 +21,13 @@ SOFT_BLUE = (179, 205, 227)
 SOFT_RED = (251, 180, 174)
 SOFT_GREEN = (204, 235, 197)
 
-
+skeleton_hrnet = [(0,1), (1,4), (4,7), (7,10), (7,27), #left leg
+                  (0,2), (2,5), (5,8), (8,11), (8,28), #right leg
+                  (0,3), (3,6), (6,9), (9,12), #spine,
+                  (12,15), (15,24), #neck head
+                  (9,13), (13,16), (16,18), (18,20), (20,22), (22,25), #left arm
+                  (9,14), (14,17), (17,19), (19,21), (21,23), (23,26) #right arm
+                  ]
 def get_one_box(det_output, thrd=0.9):
     max_area = 0
     max_bbox = None
@@ -99,10 +105,17 @@ def vis_2d(image, bbox, pts):
     x1, y1, x2, y2 = bbox
 
     image = cv2.rectangle(image, (int(x1), int(y1)), (int(x2), int(y2)), (154, 201, 219), 5)
-
+    for line in skeleton_hrnet:
+        pt1 = (int(pts[line[0]][0]), int(pts[line[0]][1]))
+        pt2 = (int(pts[line[1]][0]), int(pts[line[1]][1]))
+        color = (0, 0, 200)
+        thickness = 6
+        image = cv2.line(image, pt1, pt2, color, thickness)
     for pt in pts:
         x, y = pt
         image = cv2.circle(image, (int(x), int(y)), 3, (255, 136, 132), 3)
+    pts = pts.data.cpu().numpy()
+    
     image = pil_img.fromarray(image[:, :, :3].astype(np.uint8))
 
     return np.asarray(image)
