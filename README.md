@@ -81,24 +81,26 @@ conda create -n hybrik python=3.8 -y
 conda activate hybrik
 
 # 2. Install PyTorch
-conda install pytorch==1.9.1 torchvision==0.10.1 -c pytorch
+conda install pytorch==1.11.0 torchvision==0.12.0 -c pytorch -y
 
 # 3. Install PyTorch3D (Optional, only for visualization)
-conda install -c fvcore -c iopath -c conda-forge fvcore iopath
-conda install -c bottler nvidiacub
-pip install git+ssh://git@github.com/facebookresearch/pytorch3d.git@stable
+conda install -c fvcore -c iopath -c conda-forge fvcore iopath -y
+conda install -c bottler nvidiacub -y
+pip install git+http://git@github.com/facebookresearch/pytorch3d.git@stable
 
 # 4. Pull our code
 git clone https://github.com/Jeff-sjtu/HybrIK.git
 cd HybrIK
 
 # 5. Install
-pip install pycocotools
+pip install pycocotools scipy
 python setup.py develop  # or "pip install -e ."
+pip install mxnet-mkl==1.6.0 numpy==1.23.1
 ```
 
 Download necessary model files from [[Google Drive](https://drive.google.com/file/d/1un9yAGlGjDooPwlnwFpJrbGHRiLaBNzV/view?usp=sharing) | [Baidu](https://pan.baidu.com/s/1hVrUOt2QX_UTs4QuAgN2Lg?pwd=2u3c) (code: `2u3c`) ] and un-zip them in the `${ROOT}` directory.
 
+Save the model files in a folder called model_files. Download HRNet-W48 w/3DPW weights and rename to hybrik_hrnet.pth. Then, save it in a folder called pretrained_models.
 
 ## MODEL ZOO
 
