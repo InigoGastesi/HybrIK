@@ -85,7 +85,7 @@ opt = parser.parse_args()
 
 
 cfg_file = 'configs/256x192_adam_lr1e-3-hrw48_cam_2x_w_pw3d_3dhp.yaml'
-CKPT = './pretrained_models/hybrik_hrnet.pth'
+CKPT = './pretrained_models/best_3dpw_model.pth'
 cfg = update_config(cfg_file)
 
 bbox_3d_shape = getattr(cfg.MODEL, 'BBOX_3D_SHAPE', (2000, 2000, 2000))
@@ -188,7 +188,32 @@ if not write_stream.isOpened():
 assert write_stream.isOpened(), 'Cannot open video for writing'
 assert write2d_stream.isOpened(), 'Cannot open video for writing'
 
-os.system(f'ffmpeg -i {opt.video_name} {opt.out_dir}/raw_images/{video_basename}-%06d.png')
+
+video = cv2.VideoCapture(opt.video_name)
+
+# Variable para contar los cuadros de video
+start_frame = 60
+frame_count = 0
+os.makedirs(os.path.join(opt.out_dir, 'raw_images'), exist_ok=True)
+while True:
+    # Lee el siguiente cuadro del video
+    ret, frame = video.read()
+
+    # Verifica si se ha alcanzado el final del video
+    if not ret:
+        break
+
+    # Guarda el cuadro como una imagen
+    if frame_count >= start_frame:
+        output_path = os.path.join(opt.out_dir, 'raw_images', f"{video_basename}-{frame_count:06d}.png")
+        cv2.imwrite(output_path, frame)
+
+    # Incrementa el contador de cuadros
+    frame_count += 1
+
+# Libera el objeto de video y cierra las ventanas abiertas por OpenCV
+video.release()
+# os.system(f'ffmpeg -i {opt.video_name} {opt.out_dir}/raw_images/{video_basename}-%06d.png')
 
 
 files = os.listdir(f'{opt.out_dir}/raw_images')
@@ -313,7 +338,7 @@ for img_path in tqdm(img_path_list):
         pred_theta = pose_output.pred_theta_mats.squeeze(
             dim=0).cpu().data.numpy()
         pred_phi = pose_output.pred_phi.squeeze(dim=0).cpu().data.numpy()
-        pred_cam_root = pose_output.cam_root.squeeze(dim=0).cpu().numpy()
+        pred_cam_root = pose_output.cam_root.squeeze(dim=0).cpu().detach().numpy()
         img_size = np.array((input_image.shape[0], input_image.shape[1]))
         hrenet_pred_29 = pose_output.hrenet_pred_29.reshape(29,3).cpu().data.numpy()
         res_db['pred_xyz_17'].append(pred_xyz_jts_17)
