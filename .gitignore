@@ -113,3 +113,4 @@ model_files
 HPE.test.*
 pretrained_models
 *.mp4
+wandb
