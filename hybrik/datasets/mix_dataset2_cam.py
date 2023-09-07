@@ -9,6 +9,7 @@ from .h36m_smpl import H36mSMPL
 from .hp3d import HP3D
 from .mscoco import Mscoco
 from .pw3d import PW3D
+from .wg_coco import wg_coco
 
 s_mpii_2_smpl_jt = [
     6, 3, 2,
@@ -115,25 +116,33 @@ class MixDataset2Cam(data.Dataset):
         if train:
             self.db0 = H36mSMPL(
                 cfg=cfg,
+                root=cfg.DATASET.SET_LIST[0].ROOT,
                 ann_file=cfg.DATASET.SET_LIST[0].TRAIN_SET,
                 train=True)
             self.db1 = Mscoco(
                 cfg=cfg,
+                root=cfg.DATASET.SET_LIST[1].ROOT,
                 ann_file=f'person_keypoints_{cfg.DATASET.SET_LIST[1].TRAIN_SET}.json',
                 train=True)
             self.db2 = HP3D(
                 cfg=cfg,
+                root=cfg.DATASET.SET_LIST[2].ROOT,
                 ann_file=cfg.DATASET.SET_LIST[2].TRAIN_SET,
                 train=True)
-            self.db3 = PW3D(
+            self.db3 = wg_coco(
                 cfg=cfg,
+                root=cfg.DATASET.SET_LIST[3].ROOT,
+                ann_file=f'person_keypoints_default.json',
+                train=True)
+            self.db4 = PW3D(
+                cfg=cfg,
+                root=cfg.DATASET.SET_LIST[4].ROOT,
                 ann_file='3DPW_train_new.json',
                 train=True
             )
-
-            self._subsets = [self.db0, self.db1, self.db2, self.db3]
-            self._2d_length = len(self.db1)
-            self._3d_length = len(self.db0) + len(self.db2) + len(self.db3)
+            self._subsets = [self.db0, self.db1, self.db2, self.db3, self.db4]
+            self._2d_length = len(self.db1) + len(self.db3)
+            self._3d_length = len(self.db0) + len(self.db2) + len(self.db4)
         else:
             self.db0 = H36mSMPL(
                 cfg=cfg,
@@ -149,7 +158,7 @@ class MixDataset2Cam(data.Dataset):
             self.max_db_data_num = max(self._subset_size)
             print('max_data_set', np.argmax(np.array(self._subset_size)))
             self.tot_size = (2 * max(self._subset_size))
-            self.partition = [0.3, 0.4, 0.1, 0.2]
+            self.partition = [0.3, 0.1, 0.1, 0.3, 0.2]
         else:
             self.tot_size = self._db0_size
             self.partition = [1]
@@ -195,7 +204,7 @@ class MixDataset2Cam(data.Dataset):
 
         img, target, img_id, bbox = self._subsets[dataset_idx][sample_idx]
 
-        if dataset_idx > 0 and dataset_idx < 3:
+        if dataset_idx > 0 and dataset_idx < 4:
             # COCO, 3DHP
             label_jts_origin = target.pop('target')
             label_jts_mask_origin = target.pop('target_weight')
@@ -207,7 +216,7 @@ class MixDataset2Cam(data.Dataset):
             label_xyz_17_mask = torch.zeros(17, 3)
             label_xyz_29_mask = torch.zeros(29, 3)
 
-            if dataset_idx == 1:
+            if dataset_idx == 1 or dataset_idx == 3:
                 # COCO
                 assert label_jts_origin.dim() == 1 and label_jts_origin.shape[0] == 17 * 2, label_jts_origin.shape
 

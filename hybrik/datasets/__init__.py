@@ -5,8 +5,7 @@ from .pw3d import PW3D
 from .agora_smplx import AGORAX
 from .mix_dataset_cam import MixDatasetCam
 from .mix_dataset2_cam import MixDataset2Cam
-
 __all__ = [
     'H36mSMPL', 'HP3D', 'PW3D',
     'MixDataset', 'MixDatasetCam', 'MixDataset2Cam',
-    'AGORAX']
+    'AGORAX', 'wg_yolo']

@@ -335,7 +335,6 @@ class HRNetSMPLCam(nn.Module):
         hrenet_pred_29 = pred_uvd_jts_29.clone()
         hrenet_pred_29 = hrenet_pred_29.reshape(batch_size, 29 * 3)
 
-
         x0 = x0.view(x0.size(0), -1)
         init_shape = self.init_shape.expand(batch_size, -1)     # (B, 10,)
         init_cam = self.init_cam.expand(batch_size, -1)  # (B, 1,)
@@ -396,7 +395,10 @@ class HRNetSMPLCam(nn.Module):
             cy = (bboxes[:, 1] + bboxes[:, 3]) * 0.5
             w = (bboxes[:, 2] - bboxes[:, 0])
             h = (bboxes[:, 3] - bboxes[:, 1])
-
+            cx = cx.cuda()
+            cy = cy.cuda()
+            w = w.cuda()
+            h = h.cuda()            
             cx = cx - img_center[:, 0]
             cy = cy - img_center[:, 1]
             cx = cx / w

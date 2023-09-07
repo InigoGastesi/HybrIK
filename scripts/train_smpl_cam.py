@@ -16,8 +16,8 @@ from hybrik.opt import cfg, logger, opt
 from hybrik.utils.env import init_dist
 from hybrik.utils.metrics import DataLogger, NullWriter, calc_coord_accuracy
 from hybrik.utils.transforms import get_func_heatmap_to_coord
-# from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
+import wandb
 
 # torch.set_num_threads(64)
 num_gpu = torch.cuda.device_count()
@@ -205,7 +205,7 @@ def main():
     else:
         ngpus_per_node = torch.cuda.device_count()
         opt.ngpus_per_node = ngpus_per_node
-        main_worker(0, opt, cfg)
+        mp.spawn(main_worker, nprocs=ngpus_per_node, args=(opt, cfg))
 
 
 def main_worker(gpu, opt, cfg):
@@ -215,12 +215,19 @@ def main_worker(gpu, opt, cfg):
     if gpu is not None:
         opt.gpu = gpu
 
-    # init_dist(opt)
+    init_dist(opt)
 
-    # if not opt.log:
-    #     logger.setLevel(50)
-    #     null_writer = NullWriter()
-    #     sys.stdout = null_writer
+    if not opt.log:
+        logger.setLevel(50)
+        null_writer = NullWriter()
+        sys.stdout = null_writer
+    if opt.rank == 0:
+        wandb.login(key="ac2f619d153eef63be51515cfa465651aa4cc439")
+        wb_logger = wandb.init(
+            project="hybrik",
+            name=opt.exp_id,
+            config=cfg
+        )
 
     logger.info('******************************')
     logger.info(opt)
@@ -240,7 +247,7 @@ def main_worker(gpu, opt, cfg):
         logger.info(macs, params)
 
     m.cuda(opt.gpu)
-    # m = torch.nn.parallel.DistributedDataParallel(m, device_ids=[opt.gpu])
+    m = torch.nn.parallel.DistributedDataParallel(m, device_ids=[opt.gpu])
 
     criterion = builder.build_loss(cfg.LOSS).cuda(opt.gpu)
     optimizer = torch.optim.Adam(m.parameters(), lr=cfg.TRAIN.LR)
@@ -248,8 +255,7 @@ def main_worker(gpu, opt, cfg):
     lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(
         optimizer, milestones=cfg.TRAIN.LR_STEP, gamma=cfg.TRAIN.LR_FACTOR)
 
-    # if opt.log:
-    #     writer = SummaryWriter('.tensorboard/{}/{}-{}'.format(cfg.DATASET.DATASET, cfg.FILE_NAME, opt.exp_id))
+
     
     writer = None
 
@@ -309,7 +315,8 @@ def main_worker(gpu, opt, cfg):
         logger.epochInfo('Train', opt.epoch, loss, acc17)
 
         lr_scheduler.step()
-
+        if opt.rank == 0:
+            wandb.log({"train_acc17":acc17, "train_loss":loss})
         if (i + 1) % opt.snapshot == 0:
             if opt.log:
                 # Save checkpoint
@@ -319,6 +326,8 @@ def main_worker(gpu, opt, cfg):
             with torch.no_grad():
                 gt_tot_err_h36m = validate_gt(m, opt, cfg, gt_val_dataset_h36m, heatmap_to_coord)
                 gt_tot_err_3dpw = validate_gt(m, opt, cfg, gt_val_dataset_3dpw, heatmap_to_coord)
+                if opt.rank == 0:
+                    wandb.log({"val_err_h36m":gt_tot_err_h36m, "val_err_3dpw":gt_tot_err_3dpw})
                 if opt.log:
                     if gt_tot_err_h36m <= best_err_h36m:
                         best_err_h36m = gt_tot_err_h36m

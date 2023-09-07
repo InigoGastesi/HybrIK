@@ -16,7 +16,6 @@ parser.add_argument('--cfg',
                     type=str)
 parser.add_argument('--exp-id', default='default', type=str,
                     help='Experiment ID')
-
 "----------------------------- General options -----------------------------"
 parser.add_argument('--nThreads', default=10, type=int,
                     help='Number of data loading threads')
@@ -43,6 +42,7 @@ parser.add_argument('--exp-lr', default=False, dest='exp_lr',
                     help='Exponential lr scheduler', action='store_true')
 
 "----------------------------- Log options -----------------------------"
+parser.add_argument('--log', default=True, action='store_true')
 parser.add_argument('--board', default=True, dest='board',
                     help='Logging with tensorboard', action='store_true')
 parser.add_argument('--debug', default=False, dest='debug',

@@ -71,7 +71,7 @@ class H36mSMPL(data.Dataset):
     def __init__(self,
                  cfg,
                  ann_file,
-                 root='./data/h36m',
+                 root='../data/h36m',
                  train=True,
                  skip_empty=True,
                  dpg=False,

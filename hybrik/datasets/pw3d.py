@@ -73,7 +73,7 @@ class PW3D(data.Dataset):
     def __init__(self,
                  cfg,
                  ann_file,
-                 root='./data/pw3d',
+                 root='../data/pw3d',
                  train=True,
                  skip_empty=True,
                  dpg=False,

@@ -11,7 +11,7 @@ from hybrik.utils.bbox import bbox_clip_xyxy, bbox_xywh_to_xyxy
 from hybrik.utils.presets import SimpleTransform, SimpleTransformCam
 
 
-class Mscoco(data.Dataset):
+class wg_coco(data.Dataset):
     """ COCO Person dataset.
 
     Parameters
@@ -40,7 +40,7 @@ class Mscoco(data.Dataset):
     def __init__(self,
                  cfg,
                  ann_file,
-                 root='../data/coco',
+                 root='../data/wg_dataset_2',
                  train=True,
                  skip_empty=True,
                  dpg=False,
@@ -108,8 +108,8 @@ class Mscoco(data.Dataset):
     def __getitem__(self, idx):
         # get image id
         img_path = self.db['img_path'][idx]
-        img_id = int(os.path.splitext(os.path.basename(img_path))[0])
-
+        # img_id = int(os.path.splitext(os.path.basename(img_path))[0])
+        img_id = 0
         # load ground truth, including bbox, keypoints, image size
         label = {}
         for k in self.db.keys():
@@ -126,6 +126,7 @@ class Mscoco(data.Dataset):
         bbox = target.pop('bbox')
         return img, target, img_id, bbox
 
+        
     def __len__(self):
         return len(self.db['img_path'])
 
@@ -172,8 +173,8 @@ class Mscoco(data.Dataset):
         # iterate through the annotations
         image_ids = sorted(_coco.getImgIds())
         for entry in _coco.loadImgs(image_ids):
-            dirname, filename = entry['coco_url'].split('/')[-2:]
-            abs_path = os.path.join(self._root, dirname, filename)
+            filename = entry['file_name']
+            abs_path = os.path.join(self._root, "images", filename)
             if not os.path.exists(abs_path):
                 raise IOError('Image: {} not exists.'.format(abs_path))
             label = self._check_load_keypoints(_coco, entry)
@@ -198,6 +199,8 @@ class Mscoco(data.Dataset):
 
         for obj in objs:
             contiguous_cid = self.json_id_to_contiguous[obj['category_id']]
+            filename = entry["file_name"]
+            
             if contiguous_cid >= self.num_class:
                 # not class of interest
                 continue

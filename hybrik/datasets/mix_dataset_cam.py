@@ -8,6 +8,7 @@ import torch.utils.data as data
 from .h36m_smpl import H36mSMPL
 from .hp3d import HP3D
 from .mscoco import Mscoco
+from .wg_coco import wg_coco
 
 s_mpii_2_smpl_jt = [
     6, 3, 2,
@@ -129,13 +130,17 @@ class MixDatasetCam(data.Dataset):
                 cfg=cfg,
                 ann_file=f'person_keypoints_{cfg.DATASET.SET_LIST[1].TRAIN_SET}.json',
                 train=True)
-            self.db2 = HP3D(
+            self.db2 = wg_coco(
+                cfg=cfg,
+                ann_file=f'annotations.json',
+                train=True)
+            self.db3 = HP3D(
                 cfg=cfg,
                 ann_file=cfg.DATASET.SET_LIST[2].TRAIN_SET,
                 train=True)
 
-            self._subsets = [self.db0, self.db1, self.db2]
-            self._2d_length = len(self.db1)
+            self._subsets = [self.db0, self.db1, self.db2, self.db3]
+            self._2d_length = len(self.db1) + len(self.db2)
             self._3d_length = len(self.db0) + len(self.db2)
         else:
             self.db0 = H36mSMPL(
@@ -151,7 +156,7 @@ class MixDatasetCam(data.Dataset):
         if train:
             self.max_db_data_num = max(self._subset_size)
             self.tot_size = 2 * max(self._subset_size)
-            self.partition = [0.4, 0.5, 0.1]
+            self.partition = [0.5, 0.1, 0.3, 0.1]
         else:
             self.tot_size = self._db0_size
             self.partition = [1]
@@ -214,7 +219,7 @@ class MixDatasetCam(data.Dataset):
             label_xyz_17_mask = torch.zeros(17, 3)
             label_xyz_29_mask = torch.zeros(29, 3)
 
-            if dataset_idx == 1:
+            if dataset_idx == 1 or dataset_idx == 2:
                 # COCO
                 assert label_jts_origin.dim() == 1 and label_jts_origin.shape[0] == 17 * 2, label_jts_origin.shape
 
@@ -227,7 +232,7 @@ class MixDatasetCam(data.Dataset):
                     if id2 >= 0:
                         label_uvd_29[id1, :2] = label_jts_origin[id2, :2].clone()
                         label_uvd_29_mask[id1, :2] = label_jts_mask_origin[id2, :2].clone()
-            elif dataset_idx == 2:
+            elif dataset_idx == 3:
                 # 3DHP
                 assert label_jts_origin.dim() == 1 and label_jts_origin.shape[0] == 28 * 3, label_jts_origin.shape
 

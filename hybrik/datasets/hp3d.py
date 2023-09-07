@@ -84,7 +84,7 @@ class HP3D(data.Dataset):
     def __init__(self,
                  cfg,
                  ann_file,
-                 root='./data/3dhp',
+                 root='../data/mpi_inf_3dhp',
                  train=True,
                  skip_empty=True,
                  dpg=False,
