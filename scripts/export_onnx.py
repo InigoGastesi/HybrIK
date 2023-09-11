@@ -48,28 +48,6 @@ dummpy_set = edict({
     'bbox_3d_shape': bbox_3d_shape
 })
 
-res_keys = [
-    'pred_uvd',
-    'pred_xyz_17',
-    'pred_xyz_29',
-    'pred_xyz_24_struct',
-    'hrenet_pred_29',
-    'pred_scores',
-    'pred_camera',
-    # 'f',
-    'pred_betas',
-    'pred_thetas',
-    'pred_phi',
-    'pred_cam_root',
-    # 'features',
-    'transl',
-    'transl_camsys',
-    'bbox',
-    'height',
-    'width',
-    'img_path'
-]
-res_db = {k: [] for k in res_keys}
 
 transformation = SimpleTransform3DSMPLCam(
     dummpy_set, scale_factor=cfg.DATASET.SCALE_FACTOR,
