@@ -84,7 +84,7 @@ conda activate hybrik
 # 2. Install PyTorch
 conda install pytorch==1.9.1 torchvision==0.10.1 -c pytorch -y
 
-# 3. Install PyTorch3D (Optional, only for visualization)
+# 3. Install PyTorch3D
 conda install -c fvcore -c iopath -c conda-forge fvcore iopath -y
 conda install -c bottler nvidiacub -y
 pip install git+http://git@github.com/facebookresearch/pytorch3d.git@stable
@@ -103,7 +103,7 @@ conda activate hybrik
 # 2. Install PyTorch
 conda install pytorch==1.11.0 torchvision==0.12.0 -c pytorch -y
 
-# 3. Install PyTorch3D (Optional, only for visualization)
+# 3. Install PyTorch3D
 conda install -c fvcore -c iopath -c conda-forge fvcore iopath -y
 conda install -c bottler nvidiacub -y
 pip install git+http://git@github.com/facebookresearch/pytorch3d.git@stable
