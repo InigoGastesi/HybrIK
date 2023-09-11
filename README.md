@@ -89,11 +89,7 @@ conda install -c fvcore -c iopath -c conda-forge fvcore iopath -y
 conda install -c bottler nvidiacub -y
 pip install git+http://git@github.com/facebookresearch/pytorch3d.git@stable
 
-# 4. Pull our code
-git clone https://github.com/Jeff-sjtu/HybrIK.git
-cd HybrIK
-
-# 5. Install
+# 4. Install
 pip install pycocotools scipy
 python setup.py develop  # or "pip install -e ."
 pip install mxnet-mkl==1.6.0 numpy==1.23.1 wandb
@@ -112,11 +108,7 @@ conda install -c fvcore -c iopath -c conda-forge fvcore iopath -y
 conda install -c bottler nvidiacub -y
 pip install git+http://git@github.com/facebookresearch/pytorch3d.git@stable
 
-# 4. Pull our code
-git clone https://github.com/Jeff-sjtu/HybrIK.git
-cd HybrIK
-
-# 5. Install
+# 4. Install
 pip install pycocotools scipy
 python setup.py develop  # or "pip install -e ."
 pip install mxnet-mkl==1.6.0 numpy==1.23.1
