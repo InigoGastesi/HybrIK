@@ -1,20 +1,42 @@
 import numpy as np
 import torch
 from easydict import EasyDict as edict
-
+import argparse
 from hybrik.models import builder
 from hybrik.utils.config import update_config
 from hybrik.utils.presets import SimpleTransform3DSMPLCam
 import torch.onnx
 
 
+parser = argparse.ArgumentParser(description='HybrIK Demo')
+
+
+parser.add_argument('--model-dir',
+                    help='model path',
+                    required=True,
+                    type=str)
+parser.add_argument('--batch-size',
+                    help='batch size',
+                    default=1,
+                    type=int)
+parser.add_argument('--output-path',
+                    help='model output path with name: path/to/model.onnx',
+                    required=True,
+                    type=str)
+parser.add_argument("--dynamic-batch",
+                    help="set dynamic batch",
+                    action="store_true")
 
 
 
 
+opt = parser.parse_args()
 
-cfg_file = 'configs/256x192_adam_lr1e-3-hrw48_cam_2x_w_pw3d_3dhp.yaml'
-CKPT = '/usr/src/app/exp/mix2_smpl_cam/256x192_adam_lr1e-3-hrw48_cam_2x_w_pw3d_3dhp.yaml-surfer-checked/model_51.pth'
+
+
+
+cfg_file = 'configs/export_config.yaml'
+CKPT = opt.model_dir
 cfg = update_config(cfg_file)
 
 bbox_3d_shape = getattr(cfg.MODEL, 'BBOX_3D_SHAPE', (2000, 2000, 2000))
@@ -72,10 +94,6 @@ if type(save_dict) == dict:
 else:
     hybrik_model.load_state_dict(save_dict)
 
-hybrik_model.eval()
-
-
-
 
 prev_box = None
 renderer = None
@@ -84,16 +102,27 @@ smpl_faces = torch.from_numpy(hybrik_model.smpl.faces.astype(np.int32))
 print('### Run Model...')
 idx = 0
 
-x = torch.randn(1, 3, 256, 256, requires_grad=True)
-torch.onnx.export(hybrik_model,
+if opt.dynamic_batch:
+    x = torch.randn(opt.batch_size, 3, 256, 256, requires_grad=True)
+    torch.onnx.export(hybrik_model,
                   x,
-                  "hpe_trained.onnx",
+                  opt.out_dir,
+                  export_params=True,
+                  opset_version=11,
+                  do_constant_folding=True,
+                  input_names = ['input'],
+                  output_names = ['output'])
+else:
+    x = torch.randn(opt.batch_size, 3, 256, 256, requires_grad=True)
+    torch.onnx.export(hybrik_model,
+                  x,
+                  opt.out_dir,
                   export_params=True,
                   opset_version=11,
                   do_constant_folding=True,
                   input_names = ['input'],
                   output_names = ['output'],
-                  dynamic_axes={'input' : {0 : 'batch_size'},
+                  dynamic_axes={'input' : {0 : 'batch_size'},    # variable length axes
                                 'output' : {0 : 'batch_size'}})
 
 

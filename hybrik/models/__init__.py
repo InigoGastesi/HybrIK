@@ -6,10 +6,11 @@ from .HRNetWithCam import HRNetSMPLCam
 from .HRNetWithCamReg import HRNetSMPLCamReg
 from .HRNetSMPLXCamKid import HRNetSMPLXCamKid
 from .HRNetSMPLXCamKidReg import HRNetSMPLXCamKidReg
+from .HRNetWithOutSMPLInference import HRNetWithOutSMPLInference
 from .criterion import *  # noqa: F401,F403
 
 __all__ = [
     'Simple3DPoseBaseSMPL', 'Simple3DPoseBaseSMPL24', 'Simple3DPoseBaseSMPLCam',
     'Simple3DPoseBaseSMPLCamReg',
     'HRNetSMPLCam', 'HRNetSMPLCamReg',
-    'HRNetSMPLXCamKid', 'HRNetSMPLXCamKidReg']
+    'HRNetSMPLXCamKid', 'HRNetSMPLXCamKidReg', 'HRNetWithOutSMPLInference']
