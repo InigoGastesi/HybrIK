@@ -111,7 +111,9 @@ if opt.dynamic_batch:
                   opset_version=11,
                   do_constant_folding=True,
                   input_names = ['input'],
-                  output_names = ['output'])
+                  output_names = ['output'],
+                  dynamic_axes={'input' : {0 : 'batch_size'},    # variable length axes
+                                'output' : {0 : 'batch_size'}})
 else:
     x = torch.randn(opt.batch_size, 3, 256, 256, requires_grad=True)
     torch.onnx.export(hybrik_model,
@@ -121,8 +123,6 @@ else:
                   opset_version=11,
                   do_constant_folding=True,
                   input_names = ['input'],
-                  output_names = ['output'],
-                  dynamic_axes={'input' : {0 : 'batch_size'},    # variable length axes
-                                'output' : {0 : 'batch_size'}})
+                  output_names = ['output'])
 
 
