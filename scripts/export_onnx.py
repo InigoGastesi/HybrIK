@@ -1,4 +1,3 @@
-import numpy as np
 import torch
 from easydict import EasyDict as edict
 import argparse
@@ -7,9 +6,7 @@ from hybrik.utils.config import update_config
 from hybrik.utils.presets import SimpleTransform3DSMPLCam
 import torch.onnx
 
-
 parser = argparse.ArgumentParser(description='HybrIK Demo')
-
 
 parser.add_argument('--model-dir',
                     help='model path',
@@ -19,7 +16,7 @@ parser.add_argument('--batch-size',
                     help='batch size',
                     default=1,
                     type=int)
-parser.add_argument('--output-path',
+parser.add_argument('--out-path',
                     help='model output path with name: path/to/model.onnx',
                     required=True,
                     type=str)
@@ -27,13 +24,7 @@ parser.add_argument("--dynamic-batch",
                     help="set dynamic batch",
                     action="store_true")
 
-
-
-
 opt = parser.parse_args()
-
-
-
 
 cfg_file = 'configs/export_config.yaml'
 CKPT = opt.model_dir
@@ -48,7 +39,6 @@ dummpy_set = edict({
     'bbox_3d_shape': bbox_3d_shape
 })
 
-
 transformation = SimpleTransform3DSMPLCam(
     dummpy_set, scale_factor=cfg.DATASET.SCALE_FACTOR,
     color_factor=cfg.DATASET.COLOR_FACTOR,
@@ -61,7 +51,6 @@ transformation = SimpleTransform3DSMPLCam(
     train=False, add_dpg=False,
     loss_type=cfg.LOSS['TYPE'])
 
-
 hybrik_model = builder.build_sppe(cfg.MODEL)
 
 print(f'Loading model from {CKPT}...')
@@ -72,19 +61,13 @@ if type(save_dict) == dict:
 else:
     hybrik_model.load_state_dict(save_dict)
 
-
-prev_box = None
-renderer = None
-smpl_faces = torch.from_numpy(hybrik_model.smpl.faces.astype(np.int32))
-
-print('### Run Model...')
-idx = 0
+print('### Exporting Model...')
 
 if opt.dynamic_batch:
     x = torch.randn(opt.batch_size, 3, 256, 256, requires_grad=True)
     torch.onnx.export(hybrik_model,
                   x,
-                  opt.out_dir,
+                  opt.out_path,
                   export_params=True,
                   opset_version=11,
                   do_constant_folding=True,
@@ -96,7 +79,7 @@ else:
     x = torch.randn(opt.batch_size, 3, 256, 256, requires_grad=True)
     torch.onnx.export(hybrik_model,
                   x,
-                  opt.out_dir,
+                  opt.out_path,
                   export_params=True,
                   opset_version=11,
                   do_constant_folding=True,
