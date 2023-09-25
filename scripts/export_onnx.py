@@ -62,7 +62,7 @@ else:
     hybrik_model.load_state_dict(save_dict)
 
 print('### Exporting Model...')
-
+hybrik_model
 if opt.dynamic_batch:
     x = torch.randn(opt.batch_size, 3, 256, 256, requires_grad=True)
     torch.onnx.export(hybrik_model,

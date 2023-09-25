@@ -97,8 +97,8 @@ pip install mxnet-mkl==1.6.0 numpy==1.23.1 wandb
 ########## Export ############
 
 # 1. Create a conda virtual environment.
-conda create -n hybrik python=3.8 -y
-conda activate hybrik
+conda create -n export python=3.8 -y
+conda activate export
 
 # 2. Install PyTorch
 conda install pytorch==1.11.0 torchvision==0.12.0 -c pytorch -y
